@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giffeur</title>
+  <link rel="stylesheet" href="popup.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo-icon">G</div>
+        <h1>Giffeur</h1>
+        <span class="badge">v3.0</span>
+      </div>
+    </header>
+
+    <div class="status-panel" id="statusCard">
+      <div class="status-icon-large" id="statusIcon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="16"></line>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+        </svg>
+      </div>
+      <h2 id="statusTitle">Prêt à capturer</h2>
+      <p id="statusDesc">Définissez une zone et enregistrez</p>
+    </div>
+
+    <div class="controls">
+      <button class="btn-primary" id="selectBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"></path> <!-- Grid icon -->
+        </svg>
+        Nouvelle Sélection
+      </button>
+
+      <button class="btn-primary" id="recordBtn" disabled
+        style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="12" r="8"></circle>
+        </svg>
+        Lancer Enregistrement
+      </button>
+
+      <button class="btn-danger" id="stopBtn" style="display: none;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+        </svg>
+        Arrêter (Éditer)
+      </button>
+
+      <button class="btn-secondary" id="galleryBtn"
+        style="background: linear-gradient(135deg, #6366f1, #4f46e5); margin-top: 4px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+        Galerie
+      </button>
+    </div>
+
+    <div class="settings">
+      <div class="setting-row">
+        <span>Fluidité (FPS)</span>
+        <select id="fpsSelect">
+          <option value="15">15 FPS</option>
+          <option value="30">30 FPS</option>
+          <option value="60">60 FPS</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span>Qualité</span>
+        <select id="qualitySelect">
+          <option value="10">Moyenne</option>
+          <option value="1">Haute</option>
+          <!-- 1 is best quality in gif.js? No, 1 is best, 10 is default. Wait gif.js quality 1-30, lower is better. -->
+        </select>
+      </div>
+      <div class="setting-row">
+        <span>Raccourci</span>
+        <input type="text" id="shortcutInput" value="Ctrl+Shift+U" readonly>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>

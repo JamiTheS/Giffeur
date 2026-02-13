@@ -1,0 +1,26 @@
+{
+  "name": "quickgif-chrome-extension",
+  "version": "1.0.0",
+  "description": "Modern Chrome extension for capturing screen areas as animated GIFs",
+  "author": "Your Name",
+  "license": "MIT",
+  "keywords": [
+    "chrome-extension",
+    "gif",
+    "screen-capture",
+    "recorder",
+    "animation"
+  ],
+  "scripts": {
+    "setup": "powershell -ExecutionPolicy Bypass -File setup.ps1",
+    "setup:unix": "bash setup.sh",
+    "test": "echo 'Open chrome://extensions/ and load the extension'",
+    "build": "echo 'No build step required - ready to load in Chrome'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/quickgif"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

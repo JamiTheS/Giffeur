@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Giffeur - Éditeur Pro</title>
+  <link rel="stylesheet" href="editor.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;700&family=Courier+Prime:wght@400;700&family=Georgia&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header>
+    <h1>
+      <img src="icons/icon48.png" width="24" height="24" style="border-radius: 6px;">
+      Giffeur Pro
+    </h1>
+    <div class="header-actions">
+      <!-- Format Presets -->
+      <div class="format-presets">
+        <button class="preset-btn active" data-ratio="free" title="Libre">Free</button>
+        <button class="preset-btn" data-ratio="16:9" title="16:9">16:9</button>
+        <button class="preset-btn" data-ratio="9:16" title="9:16">9:16</button>
+        <button class="preset-btn" data-ratio="1:1" title="1:1">1:1</button>
+        <button class="preset-btn" data-ratio="4:3" title="4:3">4:3</button>
+      </div>
+      <button id="btn-discard">Annuler</button>
+      <button class="primary" id="btn-export">Exporter GIF</button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <div id="workspace">
+
+    <!-- Canvas Area (Center) -->
+    <div id="canvas-area">
+      <canvas id="main-canvas"></canvas>
+      <!-- Overlays for tool interactions -->
+      <div id="canvas-overlay"></div>
+      <!-- Crop overlay -->
+      <div id="crop-overlay" style="display:none;"></div>
+    </div>
+
+    <!-- Right Sidebar (Tools) -->
+    <div id="tools-panel">
+      <div class="tool-group">
+        <h3>Effets</h3>
+        <div class="tool-grid">
+          <div class="tool-btn" id="tool-zoom">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="11" y1="8" x2="11" y2="14"></line>
+              <line x1="8" y1="11" x2="14" y2="11"></line>
+            </svg>
+            <span>Zoom</span>
+          </div>
+          <div class="tool-btn" id="tool-text">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="4 7 4 4 20 4 20 7"></polyline>
+              <line x1="9" y1="20" x2="15" y2="20"></line>
+              <line x1="12" y1="4" x2="12" y2="20"></line>
+            </svg>
+            <span>Texte</span>
+          </div>
+          <div class="tool-btn" id="tool-blur">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="3"></rect>
+              <line x1="7" y1="8" x2="17" y2="8" stroke-dasharray="2 2"></line>
+              <line x1="7" y1="12" x2="17" y2="12" stroke-dasharray="2 2"></line>
+              <line x1="7" y1="16" x2="17" y2="16" stroke-dasharray="2 2"></line>
+            </svg>
+            <span>Flou</span>
+          </div>
+          <div class="tool-btn" id="tool-speed">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <span>Vitesse</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <h3>Annotations</h3>
+        <div class="tool-grid">
+          <div class="tool-btn" id="tool-arrow">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="19" x2="19" y2="5"></line>
+              <polyline points="13 5 19 5 19 11"></polyline>
+            </svg>
+            <span>Flèche</span>
+          </div>
+          <div class="tool-btn" id="tool-rect">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            </svg>
+            <span>Rectangle</span>
+          </div>
+          <div class="tool-btn" id="tool-circle">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+            </svg>
+            <span>Cercle</span>
+          </div>
+          <div class="tool-btn" id="tool-sticker">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <span>Image</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden file input for sticker import -->
+      <input type="file" id="sticker-file-input" accept="image/*" style="display:none;">
+
+      <div class="tool-group" id="properties-group">
+        <h3>Propriétés</h3>
+        <div id="properties-panel">
+          <p class="prop-placeholder">Sélectionnez un élément dans la timeline</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Timeline -->
+  <div id="timeline">
+    <div id="timeline-controls">
+      <button class="icon-btn" id="btn-play-pause">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+      </button>
+      <span id="time-display">00:00 / 00:00</span>
+
+      <div class="timeline-zoom-controls">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="8" y1="11" x2="14" y2="11"></line>
+        </svg>
+        <input type="range" id="timeline-zoom-slider" min="1" max="20" step="0.5" value="1">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="11" y1="8" x2="11" y2="14"></line>
+          <line x1="8" y1="11" x2="14" y2="11"></line>
+        </svg>
+        <span id="zoom-level-label">1.0x</span>
+      </div>
+    </div>
+
+    <!-- Time Ruler -->
+    <div id="timeline-ruler-wrap">
+      <div class="track-label-spacer"></div>
+      <div id="timeline-ruler-scroll">
+        <canvas id="timeline-ruler"></canvas>
+      </div>
+    </div>
+
+    <div id="timeline-tracks-wrap">
+      <div id="timeline-tracks-inner">
+        <!-- Track Labels -->
+        <div class="track-labels">
+          <div class="track-label-item">🎬 Video</div>
+          <div class="track-label-item">🔍 Zoom</div>
+          <div class="track-label-item">✏️ Text</div>
+          <div class="track-label-item">🔲 Blur</div>
+          <div class="track-label-item">📐 Shape</div>
+          <div class="track-label-item">🖼️ Sticker</div>
+          <div class="track-label-item">⚡ Speed</div>
+        </div>
+
+        <!-- Scrollable Tracks -->
+        <div id="timeline-tracks-scroll">
+          <div id="timeline-tracks">
+            <div id="track-video" class="track"></div>
+            <div id="track-zoom" class="track"></div>
+            <div id="track-text" class="track"></div>
+            <div id="track-blur" class="track"></div>
+            <div id="track-shape" class="track"></div>
+            <div id="track-sticker" class="track"></div>
+            <div id="track-speed" class="track"></div>
+
+            <!-- Scrubber Line -->
+            <div id="scrubber">
+              <div id="scrubber-head"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rendering Overlay -->
+  <div id="rendering-overlay">
+    <div style="text-align: center; color: white;">
+      <h2 style="margin-bottom: 20px;">Exportation en cours...</h2>
+      <div style="width: 300px; height: 6px; background: #334155; border-radius: 3px; overflow: hidden;">
+        <div id="progress-bar-fill" style="width: 0%; height: 100%; background: #6366f1; transition: width 0.2s;">
+        </div>
+      </div>
+      <p id="progress-text" style="margin-top: 10px; font-size: 13px; color: #94a3b8;">0%</p>
+    </div>
+  </div>
+
+  <script src="lib/gif.js"></script>
+  <script src="editor.js"></script>
+</body>
+
+</html>
