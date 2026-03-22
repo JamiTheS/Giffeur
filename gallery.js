@@ -97,16 +97,14 @@ async function clearAll() {
     loadGallery();
 }
 
-function getAllRecordings() {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const db = await openDB();
-            if (!db.objectStoreNames.contains('gallery')) { resolve([]); return; }
-            const tx = db.transaction('gallery', 'readonly');
-            const req = tx.objectStore('gallery').getAll();
-            req.onsuccess = () => resolve(req.result || []);
-            req.onerror = () => reject(req.error);
-        } catch (e) { reject(e); }
+async function getAllRecordings() {
+    const db = await openDB();
+    if (!db.objectStoreNames.contains('gallery')) return [];
+    const tx = db.transaction('gallery', 'readonly');
+    const req = tx.objectStore('gallery').getAll();
+    return new Promise((resolve, reject) => {
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => reject(req.error);
     });
 }
 

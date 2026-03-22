@@ -45,6 +45,11 @@ function init() {
 }
 
 function cleanup() {
+  // Remove document-level listeners to prevent accumulation
+  document.removeEventListener('mousemove', handleMouseMove, true);
+  document.removeEventListener('mouseup', handleMouseUp, true);
+  document.removeEventListener('keydown', handleKeyDown);
+
   ['quickgif-selection', 'quickgif-dimensions', 'quickgif-floating-ui', 'quickgif-recording',
     'quickgif-animations', 'quickgif-rec-border', 'quickgif-interaction', 'quickgif-help'].forEach(id => {
       const el = document.getElementById(id);
@@ -829,6 +834,9 @@ chrome.runtime.onMessage.addListener((msg, sender, resp) => {
   }
   if (msg.action === 'recordingComplete') { cancelEverything(); showNotification('GIF enregistré ! 🎉', 'success'); }
   if (msg.action === 'recordingError') { cancelEverything(); showNotification('Erreur: ' + (msg.error || 'Échec'), 'error'); }
+  if (msg.action === 'clearSelection') {
+    cancelEverything();
+  }
   if (msg.action === 'hideRecordingIndicator') {
     const rec = document.getElementById('quickgif-recording');
     if (rec) rec.remove();

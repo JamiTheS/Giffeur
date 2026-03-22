@@ -200,26 +200,3 @@ function forwardToTab(action, data) {
   }
 }
 
-// ===== DOWNLOAD GIF =====
-function downloadGif(dataUrl) {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-  const filename = `giffeur-${timestamp}.gif`;
-
-  chrome.downloads.download({
-    url: dataUrl,
-    filename: filename,
-    saveAs: true
-  }, (downloadId) => {
-    if (chrome.runtime.lastError) {
-      console.error('Download error:', chrome.runtime.lastError);
-    } else {
-      console.log('GIF downloaded:', filename);
-      chrome.notifications.create({
-        type: 'basic',
-        iconUrl: 'icons/icon48.png',
-        title: 'Giffeur - Succès !',
-        message: `GIF enregistré : ${filename}`
-      });
-    }
-  });
-}
