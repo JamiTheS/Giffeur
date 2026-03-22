@@ -12,6 +12,10 @@
     "offscreen",
     "notifications"
   ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
   "commands": {
     "toggle-recording": {
       "suggested_key": {

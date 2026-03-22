@@ -12,20 +12,15 @@ const state = {
 const selectBtn = document.getElementById('selectBtn');
 const recordBtn = document.getElementById('recordBtn');
 const stopBtn = document.getElementById('stopBtn');
-const statusCard = document.getElementById('statusCard'); // Now .status-panel
+const statusCard = document.getElementById('statusCard');
 const statusTitle = document.getElementById('statusTitle');
 const statusDesc = document.getElementById('statusDesc');
 const statusIcon = document.getElementById('statusIcon');
-// Progress elements removed in new HTML, using status state instead
 const fpsSelect = document.getElementById('fpsSelect');
 const qualitySelect = document.getElementById('qualitySelect');
 const shortcutInput = document.getElementById('shortcutInput');
 
-// ... (Initialization remains same) ...
-
-// ... (Event Listeners remain same) ...
-
-// Messages
+// ===== MESSAGES DU BACKGROUND / CONTENT SCRIPT =====
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.action) {
     case 'selectionComplete':
@@ -34,7 +29,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
     case 'recordingProgress':
       state.isProcessing = true;
-      // Just show processing state, no specific bar in this minimal UI
       updateStatus('Traitement...', Math.round(message.progress * 100) + '%', 'processing');
       break;
     case 'recordingComplete':
@@ -46,107 +40,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-// ... (Start/Stop Recording logic mostly same, just UI updates) ...
-
-function stopRecording() {
-  state.isRecording = false;
-  stopBtn.style.display = 'none';
-  statusCard.classList.remove('recording');
-  statusCard.classList.add('processing');
-
-  updateStatus('Traitement', 'Génération du GIF...', 'processing');
-
-  chrome.runtime.sendMessage({ action: 'stopRecording' });
-}
-
-// ===== UI UPDATES =====
-function updateUIForSelection() {
-  state.isSelecting = false;
-  selectBtn.disabled = false;
-  recordBtn.disabled = false;
-
-  const { width, height } = state.selectedArea;
-  updateStatus(
-    'Zone Prête',
-    `${Math.round(width)}×${Math.round(height)} px`,
-    'ready'
-  );
-}
-
-function updateStatus(title, desc, type) {
-  statusTitle.textContent = title;
-  statusDesc.textContent = desc;
-
-  // Update Icon based on type
-  let iconSVG = '';
-  switch (type) {
-    case 'selecting':
-      iconSVG = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4 4"/></svg>';
-      break;
-    case 'ready':
-      iconSVG = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
-      break;
-    case 'countdown':
-      iconSVG = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
-      break;
-    case 'recording':
-      iconSVG = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>';
-      break;
-    case 'processing':
-      iconSVG = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>';
-      break;
-    case 'success':
-      iconSVG = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
-      break;
-    case 'error':
-      iconSVG = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
-      break;
-    default:
-      iconSVG = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>';
-  }
-  statusIcon.innerHTML = iconSVG;
-}
-
-// Remove updateProgress function as UI element is gone
-// or keep empty if called elsewhere
-
-async function handleRecordingComplete() {
-  statusCard.classList.remove('processing', 'recording');
-  statusCard.classList.add('success');
-  updateStatus('Terminé !', 'Ouverture de l\'éditeur...', 'success');
-  await sleep(2000);
-  window.close(); // Close popup as editor opens
-}
-
-function handleRecordingError(error) {
-  statusCard.classList.remove('processing', 'recording');
-  updateStatus('Erreur', error || 'Échec', 'error');
-  resetUI();
-}
-
-function resetUI() {
-  state.isRecording = false;
-  state.isProcessing = false;
-  state.selectedArea = null;
-
-  statusCard.classList.remove('recording', 'processing', 'success');
-  recordBtn.disabled = true;
-  recordBtn.style.display = 'flex';
-  stopBtn.style.display = 'none';
-
-  updateStatus('Prêt à capturer', 'Nouvelle sélection ?', 'ready');
-  chrome.tabs.sendMessage(state.tabId, { action: 'clearSelection' }).catch(() => { });
-}
-
 // ===== INITIALISATION =====
 document.addEventListener('DOMContentLoaded', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   state.tabId = tab.id;
 
-  // Page système non supportée
+  // Pages non supportées
   const url = tab.url || '';
-  if (url.startsWith('chrome://') || url.startsWith('chrome-extension://') || url.startsWith('edge://')) {
-    updateStatus('Page non supportée', 'Impossible de capturer les pages système', 'error');
+  const isRestricted =
+    url.startsWith('chrome://') ||
+    url.startsWith('chrome-extension://') ||
+    url.startsWith('edge://') ||
+    url.startsWith('https://chromewebstore.google.com/') ||
+    url.startsWith('https://chrome.google.com/webstore/') ||
+    url === '' ||
+    url === 'about:blank';
+
+  if (isRestricted) {
+    updateStatus('Page non supportée', 'Naviguez vers une page web pour utiliser Giffeur', 'error');
     selectBtn.disabled = true;
     return;
   }
@@ -158,10 +69,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (settings.customShortcut) {
     shortcutInput.value = formatShortcut(settings.customShortcut);
   } else {
-    shortcutInput.value = 'Ctrl+Shift+U'; // Default visual
+    shortcutInput.value = 'Ctrl+Shift+U';
   }
 
-  // Vérifier s'il y a déjà une sélection
+  // Vérifier s'il y a déjà une sélection active
   chrome.tabs.sendMessage(state.tabId, { action: 'getSelection' }, (response) => {
     if (chrome.runtime.lastError) return;
     if (response && response.area) {
@@ -194,7 +105,6 @@ shortcutInput.addEventListener('keydown', (e) => {
     return;
   }
 
-  // Ignore modifier-only presses
   if (['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) return;
 
   const shortcut = {
@@ -205,8 +115,7 @@ shortcutInput.addEventListener('keydown', (e) => {
     metaKey: e.metaKey
   };
 
-  const str = formatShortcut(shortcut);
-  shortcutInput.value = str;
+  shortcutInput.value = formatShortcut(shortcut);
   chrome.storage.local.set({ customShortcut: shortcut });
   shortcutInput.blur();
 });
@@ -220,26 +129,6 @@ function formatShortcut(s) {
   parts.push(s.key.length === 1 ? s.key.toUpperCase() : s.key);
   return parts.join('+');
 }
-
-// Messages du background / content script
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  switch (message.action) {
-    case 'selectionComplete':
-      state.selectedArea = message.area;
-      updateUIForSelection();
-      break;
-    case 'recordingProgress':
-      state.isProcessing = true;
-      updateProgress(message.progress);
-      break;
-    case 'recordingComplete':
-      handleRecordingComplete();
-      break;
-    case 'recordingError':
-      handleRecordingError(message.error);
-      break;
-  }
-});
 
 // ===== SÉLECTION =====
 async function startSelection() {
@@ -280,12 +169,18 @@ async function startSelection() {
         }
 
         if (!ready) {
-          updateStatus('Erreur', 'Le script ne répond pas', 'error');
+          updateStatus('Erreur', 'Le script ne répond pas. Rechargez la page et réessayez.', 'error');
           selectBtn.disabled = false;
           return;
         }
       } catch (injErr) {
-        updateStatus('Erreur', injErr.message, 'error');
+        // Injection bloquée (page système, extension, etc.)
+        const msg = injErr.message || '';
+        if (msg.includes('Cannot access') || msg.includes('chrome-extension') || msg.includes('gallery')) {
+          updateStatus('Page non supportée', 'Naviguez vers une page web pour utiliser Giffeur', 'error');
+        } else {
+          updateStatus('Erreur', msg || 'Injection impossible', 'error');
+        }
         selectBtn.disabled = false;
         return;
       }
@@ -315,8 +210,6 @@ async function startRecording() {
 
   updateStatus('Démarrage...', 'Compte à rebours...', 'countdown');
 
-  // L'enregistrement est lancé depuis le content script (bouton flottant)
-  // Mais si l'utilisateur utilise le popup, on envoie directement
   chrome.runtime.sendMessage({
     action: 'startRecording',
     area: state.selectedArea,
@@ -336,7 +229,6 @@ function stopRecording() {
   statusCard.classList.add('processing');
 
   updateStatus('Traitement', 'Génération du GIF...', 'processing');
-  progressContainer.style.display = 'block';
 
   chrome.runtime.sendMessage({ action: 'stopRecording' });
 }
@@ -349,7 +241,7 @@ function updateUIForSelection() {
 
   const { width, height } = state.selectedArea;
   updateStatus(
-    'Zone sélectionnée ✓',
+    'Zone sélectionnée',
     `${Math.round(width)}×${Math.round(height)} px — Utilisez les boutons sur la page`,
     'ready'
   );
@@ -359,35 +251,22 @@ function updateStatus(title, desc, type) {
   statusTitle.textContent = title;
   statusDesc.textContent = desc;
 
-  const icons = {
-    selecting: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="2 2" />',
-    ready: '<polyline points="20 6 9 17 4 12" />',
-    countdown: '<path d="M12 6v6l4 2" /><circle cx="12" cy="12" r="10" />',
-    recording: '<circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="3" fill="currentColor" />',
-    processing: '<path d="M21 12a9 9 0 11-6.219-8.56" />',
-    success: '<polyline points="20 6 9 17 4 12" />',
-    error: '<circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />'
+  const svgIcons = {
+    selecting: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4 4"/></svg>',
+    ready: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+    countdown: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+    recording: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>',
+    processing: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>',
+    success: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    error: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
   };
-  statusIcon.innerHTML = icons[type] || icons.ready;
-}
-
-function updateProgress(progress) {
-  const percentage = Math.round(progress * 100);
-  progressFill.style.width = `${percentage}%`;
-  progressText.textContent = `${percentage}%`;
-
-  if (!progressContainer.style.display || progressContainer.style.display === 'none') {
-    progressContainer.style.display = 'block';
-  }
+  statusIcon.innerHTML = svgIcons[type] || svgIcons.ready;
 }
 
 async function handleRecordingComplete() {
   statusCard.classList.remove('processing', 'recording');
   statusCard.classList.add('success');
-
-  updateStatus('Terminé ! 🎉', 'Votre GIF a été téléchargé', 'success');
-  updateProgress(1);
-
+  updateStatus('Terminé !', 'Votre GIF a été téléchargé', 'success');
   await sleep(4000);
   resetUI();
 }
@@ -407,8 +286,6 @@ function resetUI() {
   recordBtn.disabled = true;
   recordBtn.style.display = 'flex';
   stopBtn.style.display = 'none';
-  progressContainer.style.display = 'none';
-  progressFill.style.width = '0%';
 
   updateStatus('Prêt à capturer', 'Sélectionnez une zone et enregistrez', 'ready');
 
