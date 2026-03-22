@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Giffeur",
   "version": "1.2.0",
-  "description": "Capture any screen area as an animated GIF with a modern, intuitive interface",
+  "description": "Capturez n'importe quelle zone de votre écran en GIF animé avec une interface moderne et intuitive.",
   "permissions": [
     "activeTab",
     "scripting",
@@ -10,10 +10,6 @@
     "tabCapture",
     "offscreen",
     "notifications"
-  ],
-  "host_permissions": [
-    "http://*/*",
-    "https://*/*"
   ],
   "commands": {
     "toggle-recording": {
@@ -41,7 +37,7 @@
         "lib/gif.worker.js"
       ],
       "matches": [
-        "<all_urls>"
+        "chrome-extension://*/*"
       ]
     }
   ],

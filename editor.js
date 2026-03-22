@@ -258,7 +258,7 @@ function drawRuler() {
         const x = (t / state.duration) * w, isM = Math.abs(t % major) < 0.001 || Math.abs(t % major - major) < 0.001;
         rc.strokeStyle = isM ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.12)'; rc.lineWidth = 1;
         rc.beginPath(); rc.moveTo(Math.round(x) + 0.5, isM ? 3 : 10); rc.lineTo(Math.round(x) + 0.5, h); rc.stroke();
-        if (isM) { rc.fillStyle = '#94a3b8'; rc.font = '8px Inter,sans-serif'; rc.textAlign = 'center'; rc.fillText(t.toFixed(1) + 's', x, 10); }
+        if (isM) { rc.fillStyle = '#94a3b8'; rc.font = '8px system-ui,sans-serif'; rc.textAlign = 'center'; rc.fillText(t.toFixed(1) + 's', x, 10); }
     }
 }
 
@@ -417,7 +417,7 @@ function showTextProps(idx) {
     propsPanel.appendChild(createPropRow('Texte', createInput('text', t.text, {}, function () { t.text = this.value; renderClips(); })));
     appendTimeInputs(t);
 
-    const fonts = ['Inter', 'Arial', 'Roboto', 'Courier Prime', 'Georgia', 'Impact', 'Comic Sans MS', 'Verdana'];
+    const fonts = ['Arial', 'Helvetica', 'Georgia', 'Verdana', 'Impact', 'Courier New', 'Comic Sans MS', 'Trebuchet MS'];
     propsPanel.appendChild(createPropRow('Police', createSelect(fonts.map(f => ({ value: f, label: f })), t.fontFamily, function () { t.fontFamily = this.value; renderClips(); })));
 
     const szRow = createPropRow('Taille', createInput('range', t.fontSize || 40, { min: 12, max: 120 }, function () { t.fontSize = parseInt(this.value); this.nextSibling.textContent = t.fontSize + 'px'; renderClips(); }));
@@ -602,7 +602,7 @@ function setupCanvasInteractions() {
         const { nx, ny } = getMouseNorm(e);
         if (state.activeTool === 'text-place') {
             const s = state.currentTime, d = Math.min(3, state.duration - s);
-            state.textTracks.push({ start: s, end: s + d, x: Math.max(0.05, Math.min(0.95, nx)), y: Math.max(0.05, Math.min(0.95, ny)), text: 'Texte', fontFamily: 'Inter', fontSize: 40, color: '#ffffff', bold: true, italic: false, stroke: true, strokeColor: '#000000' });
+            state.textTracks.push({ start: s, end: s + d, x: Math.max(0.05, Math.min(0.95, nx)), y: Math.max(0.05, Math.min(0.95, ny)), text: 'Texte', fontFamily: 'Arial', fontSize: 40, color: '#ffffff', bold: true, italic: false, stroke: true, strokeColor: '#000000' });
             deactivateTool(); selectClip('text', state.textTracks.length - 1); renderClips();
         } else if (state.activeTool === 'blur-place') {
             const s = state.currentTime, d = Math.min(3, state.duration - s);
