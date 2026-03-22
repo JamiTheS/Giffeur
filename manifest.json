@@ -1,13 +1,12 @@
 {
   "manifest_version": 3,
   "name": "Giffeur",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Capture any screen area as an animated GIF with a modern, intuitive interface",
   "permissions": [
     "activeTab",
     "scripting",
     "storage",
-    "downloads",
     "tabCapture",
     "offscreen",
     "notifications"
@@ -39,11 +38,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "icons/*.png",
-        "lib/*.js",
-        "gallery.html",
-        "gallery.css",
-        "gallery.js"
+        "lib/gif.worker.js"
       ],
       "matches": [
         "<all_urls>"
