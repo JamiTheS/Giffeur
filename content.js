@@ -812,6 +812,13 @@ function showRecordingIndicator() {
   document.body.appendChild(el);
 }
 
+function hideFloatingUI() {
+  if (floatingUI) {
+    floatingUI.remove();
+    floatingUI = null;
+  }
+}
+
 function cancelEverything() {
   isSelecting = false; isRecording = false; isDragging = false;
   cleanup();
@@ -825,28 +832,31 @@ function handleKeyDown(e) {
 
 // LISTENERS
 chrome.runtime.onMessage.addListener((msg, sender, resp) => {
-  if (msg.action === 'ping') {
-    resp({ status: 'ok' });
-  }
-  if (msg.action === 'startSelection') {
-    init();
-    startSelection();
-  }
-  if (msg.action === 'recordingComplete') { cancelEverything(); showNotification('GIF enregistré ! 🎉', 'success'); }
-  if (msg.action === 'recordingError') { cancelEverything(); showNotification('Erreur: ' + (msg.error || 'Échec'), 'error'); }
-  if (msg.action === 'clearSelection') {
-    cancelEverything();
-  }
-  if (msg.action === 'hideRecordingIndicator') {
-    const rec = document.getElementById('quickgif-recording');
-    if (rec) rec.remove();
-  }
+  try {
+    if (msg.action === 'ping') {
+      resp({ status: 'ok' });
+    }
+    if (msg.action === 'startSelection') {
+      console.log('[Giffeur] startSelection received');
+      init();
+      startSelection();
+      resp({ status: 'ok' });
+    }
+    if (msg.action === 'recordingComplete') { cancelEverything(); showNotification('GIF enregistré ! 🎉', 'success'); }
+    if (msg.action === 'recordingError') { cancelEverything(); showNotification('Erreur: ' + (msg.error || 'Échec'), 'error'); }
+    if (msg.action === 'clearSelection') {
+      cancelEverything();
+    }
+    if (msg.action === 'hideRecordingIndicator') {
+      const rec = document.getElementById('quickgif-recording');
+      if (rec) rec.remove();
+    }
 
-  // Shortcuts logic
-  if (msg.action === 'toggleRecording') {
-    if (isRecording) {
-      chrome.runtime.sendMessage({ action: 'stopRecording' });
-    } else if (isSelecting) {
+    // Shortcuts logic
+    if (msg.action === 'toggleRecording') {
+      if (isRecording) {
+        chrome.runtime.sendMessage({ action: 'stopRecording' });
+      } else if (isSelecting) {
       cancelEverything();
     } else {
       init();
@@ -854,9 +864,12 @@ chrome.runtime.onMessage.addListener((msg, sender, resp) => {
     }
   }
 
-  // Support for getSelection if needed by popup?
-  if (msg.action === 'getSelection') {
-    resp({ area: selectionArea });
+    // Support for getSelection if needed by popup?
+    if (msg.action === 'getSelection') {
+      resp({ area: selectionArea });
+    }
+  } catch (err) {
+    console.error('[Giffeur] Message handler error:', err);
   }
   return true;
 });

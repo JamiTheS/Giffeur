@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Giffeur",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Capturez n'importe quelle zone de votre écran en GIF animé avec une interface moderne et intuitive.",
   "permissions": [
     "activeTab",

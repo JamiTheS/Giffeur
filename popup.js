@@ -47,14 +47,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Pages non supportées
   const url = tab.url || '';
-  const isRestricted =
+  const isRestricted = url !== '' && (
     url.startsWith('chrome://') ||
     url.startsWith('chrome-extension://') ||
     url.startsWith('edge://') ||
     url.startsWith('https://chromewebstore.google.com/') ||
     url.startsWith('https://chrome.google.com/webstore/') ||
-    url === '' ||
-    url === 'about:blank';
+    url === 'about:blank'
+  );
 
   if (isRestricted) {
     updateStatus('Page non supportée', 'Naviguez vers une page web pour utiliser Giffeur', 'error');
@@ -146,6 +146,7 @@ async function startSelection() {
 
     if (!alive) {
       // Injecter le content script
+      console.log('[Giffeur] Injecting content script into tab', state.tabId);
       try {
         await chrome.scripting.executeScript({
           target: { tabId: state.tabId },
@@ -155,6 +156,7 @@ async function startSelection() {
           target: { tabId: state.tabId },
           files: ['content.css']
         });
+        console.log('[Giffeur] Content script injected successfully');
 
         // Attendre que le script soit prêt
         let ready = false;
@@ -189,12 +191,17 @@ async function startSelection() {
     // Démarrer la sélection
     chrome.tabs.sendMessage(state.tabId, { action: 'startSelection' }, (response) => {
       if (chrome.runtime.lastError) {
+        console.error('[Giffeur] startSelection error:', chrome.runtime.lastError.message);
         updateStatus('Erreur', chrome.runtime.lastError.message, 'error');
         selectBtn.disabled = false;
+        return;
       }
+      // Fermer le popup pour révéler l'overlay de sélection
+      window.close();
     });
   } catch (error) {
-    updateStatus('Erreur', 'Impossible de démarrer', 'error');
+    console.error('[Giffeur] startSelection exception:', error);
+    updateStatus('Erreur', error.message || 'Impossible de démarrer', 'error');
     selectBtn.disabled = false;
   }
 }
